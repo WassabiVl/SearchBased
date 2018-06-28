@@ -1,0 +1,154 @@
+{
+    "Game" : {
+        "config_name": "standard",
+        "creation_date": "2018-05-28",
+        "author": "André Karge",
+        "parameter": {
+            "global_parameter": {
+                "window": {
+                    "width": 800,
+                    "height": 600
+                },
+                "frame": {
+                    "width": 800,
+                    "height": 600,
+                    "background_color": "rgb(255,255,255)",
+                    "background_image": "url(./img/background.png)"
+                },
+                "game_speed": 20,
+                "border_width": 20,
+                "num_individuals": 10,
+                "num_food": 25,
+                "spawn_prob_food": 0.1,
+                "num_poison": 30,
+                "spawn_prob_poison": 0.1,
+                "num_rainbow_drops": 5,
+                "spawn_prob_rainbow_drops": 0.01,
+                "num_heal_potion": 10,
+                "spawn_prob_heal_potion": 0.01,
+                "num_predators": 15,
+                "spawn_prob_predators": 0.005,
+                "_breeding_frame": 1000,
+                "breeding_frame": 1000
+            },
+            "individuals": {
+                "start_size": 10,
+                "max_perception": 20,
+                "max_speed": 3,
+                "max_force": 0.25,
+                "max_health": 1,
+                "min_poison": 1,
+                "start_poison": 1,
+                "default_dmg": 0.1,
+                "frame_health_reduce": 0.0005,
+                "use_default_desires": false,
+                "default_desires": {
+                    "absolute": 1,
+                    "_comment": "sum of all has to be 1",
+                    "seek_food": 0.5,
+                    "dodge_poison": 0.5,
+                    "seek_potion": 0.5,
+                    "seek_opponents": 0,
+                    "seek_corpse": 0,
+                    "dodge_predators": 0,
+                    "seek_rainbow_drops": 0,
+                    "seek_aoe": 0,
+                    "dodge_aoe": 0
+                },
+                "use_default_perception": false,
+                "default_perception": {
+                    "absolute": 300,
+                    "_comment": "sum of all has to be 1",
+                    "food": 0.4,
+                    "poison": 0.3,
+                    "health_potion": 0.4,
+                    "corpse": 0,
+                    "opponent": 0,
+                    "predator": 0,
+                    "rainbow_drop": 0,
+                    "aoe": 0
+                },
+                "use_default_abilities": false,
+                "default_abilities": {
+                    "absolute": 1,
+                    "_comment": "sum of all has to be 1",
+                    "increased_armor": 1,
+                    "speed": 1,
+                    "poison_resistance": 1,
+                    "toxicity": 1,
+                    "strength": 1
+                }
+            },
+            "predators": {
+                "size": 20,
+                "speed_factor": 0.5,
+                "color": [139, 69, 19],
+                "default_dmg": 0.1,
+                "frame_health_reduce": 0.0005,
+                "default_perception": {
+                    "_comment": "sum of all has to be 1",
+                    "absolute": 150,
+                    "food": 0,
+                    "poison": 0,
+                    "health_potion": 0,
+                    "corpse": 0.5,
+                    "opponent": 0.5,
+                    "predator": 0,
+                    "rainbow_drop": 0,
+                    "aoe": 0
+                },
+                "default_desires": {
+                    "absolute": 1,
+                    "_comment": "sum of all has to be 1",
+                    "seek_food": 0,
+                    "dodge_poison": 0,
+                    "seek_potion": 0,
+                    "seek_opponents": 0.5,
+                    "seek_corpse": 0.5,
+                    "dodge_predators": 0,
+                    "seek_rainbow_drops": 0,
+                    "seek_aoe": 0,
+                    "dodge_aoe": 0
+                }
+            },
+            "ability_base": {
+                "armor_dmg_reduce": 0.8,
+                "max_speed_increase": 1,
+                "max_poison_reduce": 0.8,
+                "toxicity_max_dmg": 0.1
+            },
+            "items": {
+                "food": {
+                    "size": 5,
+                    "color": "green",
+                    "image": "./img/food4_scaled20.png",
+                    "nutrition": 0.1
+                },
+                "poison": {
+                    "size": 5,
+                    "color": "red",
+                    "image": "./img/mushroom_kenny.png",
+                    "poisonness": 1
+                },
+                "rainbow_drops": {
+                    "size": 5,
+                    "color": "rainbow",
+                    "image": "",
+                    "probability": 0.5
+                },
+                "corpse": {
+                    "size": 10,
+                    "color": "brown",
+                    "image": "./img/meat.png",
+                    "nutrition": 0.1
+                },
+                "heal_potion": {
+                    "size": 8,
+                    "color": "violet",
+                    "_image": "./img/hp_potion_shadow.png",
+                    "image": "./img/hp_potion_shadow_scaled20.png"
+                }
+            }
+        }
+    }
+}
