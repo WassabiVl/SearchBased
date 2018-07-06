@@ -1,9 +1,11 @@
 from game.individuals.dot import Dot
 
-from random import choice, uniform
-from copy import copy
+from copy import deepcopy
 
 import numpy as np
+from numpy.random import choice, uniform
+
+
 
 class Breeder:
     def __init__(self, parent):
@@ -26,7 +28,6 @@ class Breeder:
         """
         return self.initialize_population_example(num_individuals, color)
 
-    
     def initialize_population_example(self, num_individuals, color):
         """
         example initializer
@@ -37,13 +38,12 @@ class Breeder:
             population.append(Dot(self.parent, color=color))
         return population
 
-
     def breed_copy_dead_example(self, population):
         """
         example breeding function
         simply copy dead individuals traits to a new individual
         """
-        population_cpy = copy(population)
+        population_cpy = deepcopy(population)
 
         dead = []
         alive = []
@@ -57,7 +57,7 @@ class Breeder:
             print("END OF BREED")
             return None
         for _ in range(len(dead)):
-            dead_individual = choice(dead)
+            dead_individual = np.choice(dead)
             alive_individual = choice(alive)
 
             new_individual = Dot(self.parent,
@@ -69,12 +69,11 @@ class Breeder:
             population_cpy.remove(dead_individual)
         return population_cpy
 
-
     def breed_example_with_ga(self, population):
         """
         application of a basic genetic algorithm for breeding
         """
-        population_cpy = copy(population)
+        population_cpy = deepcopy(population)
         dead = []
         alive = []
         for individual in population_cpy:
@@ -91,7 +90,7 @@ class Breeder:
             selected = self.select_example(population_cpy)
             parent1 = selected[0]
             parent2 = selected[1]
-            child1, child2 = self.crossover_example(copy(parent1), copy(parent2))
+            child1, child2 = self.crossover_example(deepcopy(parent1), deepcopy(parent2))
             child1 = self.tweak_example(child1)
             child2 = self.tweak_example(child2)
             score_child1 = self.assess_individual_fitness_example(child1)
@@ -104,7 +103,6 @@ class Breeder:
         for dead_individual in dead:
             population_cpy.remove(dead_individual)
         return population_cpy
-
 
     def tweak_example(self, individual):
         """
@@ -150,18 +148,17 @@ class Breeder:
         # otherwise we cannot do anything
         return dna
 
-
     def crossover_example(self, solution_a, solution_b):
         """
         crossover of two individuals
         """
         dna_a = solution_a.get_dna()
         dna_b = solution_b.get_dna()
-        for i in range(len(dna_a)):
-            if uniform(0, 1) < 0.5:
-                tmp = dna_a[i]
-                dna_a[i] = dna_b[i]
-                dna_b[i] = tmp
+        if dna_a != dna_b:  # stop crossover twins
+            for i in range(len(dna_a)):
+                if dna_a[i] != dna_b[i]:  # reduce processing time
+                    if uniform(0, 1) < 0.5:
+                        dna_a[i], dna_b[i] = dna_b[i], dna_a[i]
         solution_a.dna_to_traits(dna_a)
         solution_b.dna_to_traits(dna_b)
         return solution_a, solution_b
@@ -174,11 +171,11 @@ class Breeder:
         for i in range(len(population)):
             score = self.assess_individual_fitness_example(population[i])
             fitness_array[i] = score
-        
+
         # span value range
         for i in range(1, len(fitness_array)):
             fitness_array[i] = fitness_array[i] + fitness_array[i - 1]
-        
+
         parents = self.selectParentSUS(population, fitness_array, 2)
         return parents
 
@@ -237,5 +234,5 @@ class Breeder:
         # maybe one that survived long, had a large food perception
         # and a high desire to eat food + high armor?
         score = dna[0][0] + dna[1][0] + dna[2][0] + \
-            statistic.time_survived + statistic.food_eaten + statistic.food_seen
+                statistic.time_survived + statistic.food_eaten + statistic.food_seen
         return score
