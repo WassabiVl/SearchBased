@@ -1,10 +1,9 @@
 from game.individuals.dot import Dot
 
 from copy import deepcopy
-
+from math import isclose
 import numpy as np
-from numpy.random import choice, uniform
-
+from random import choice, uniform
 
 
 class Breeder:
@@ -57,7 +56,7 @@ class Breeder:
             print("END OF BREED")
             return None
         for _ in range(len(dead)):
-            dead_individual = np.choice(dead)
+            dead_individual = choice(dead)
             alive_individual = choice(alive)
 
             new_individual = Dot(self.parent,
@@ -90,7 +89,7 @@ class Breeder:
             selected = self.select_example(population_cpy)
             parent1 = selected[0]
             parent2 = selected[1]
-            child1, child2 = self.crossover_example(deepcopy(parent1), deepcopy(parent2))
+            child1, child2 = self.crossover_line_recombination_algorithm(deepcopy(parent1), deepcopy(parent2))
             child1 = self.tweak_example(child1)
             child2 = self.tweak_example(child2)
             score_child1 = self.assess_individual_fitness_example(child1)
@@ -148,16 +147,23 @@ class Breeder:
         # otherwise we cannot do anything
         return dna
 
-    def crossover_example(self, solution_a, solution_b):
+    @staticmethod
+    def crossover_line_recombination_algorithm(solution_a, solution_b):
         """
         crossover of two individuals
         """
+        outreach_p = 0.25
+        alpha = uniform(-outreach_p, 1 + outreach_p)
+        beta = uniform(-outreach_p, 1 + outreach_p)
         dna_a = solution_a.get_dna()
         dna_b = solution_b.get_dna()
         if dna_a != dna_b:  # stop crossover twins
             for i in range(len(dna_a)):
                 if dna_a[i] != dna_b[i]:  # reduce processing time
-                    if uniform(0, 1) < 0.5:
+                    t = alpha * dna_a[i] + (1 - alpha) * dna_b[i]
+                    s = beta * dna_b[i] + (1 - beta) * dna_a[i]
+                    if (isclose(t, 0, rel_tol=1e-2) or isclose(t, 1, rel_tol=1e-2)) and (
+                            isclose(s, 0, rel_tol=1e-2) or isclose(s, 1, rel_tol=1e-2)):
                         dna_a[i], dna_b[i] = dna_b[i], dna_a[i]
         solution_a.dna_to_traits(dna_a)
         solution_b.dna_to_traits(dna_b)
@@ -233,6 +239,10 @@ class Breeder:
         # what makes up a good individual?
         # maybe one that survived long, had a large food perception
         # and a high desire to eat food + high armor?
-        score = dna[0][0] + dna[1][0] + dna[2][0] + \
-                statistic.time_survived + statistic.food_eaten + statistic.food_seen
+        statistic_score = 2.0 * statistic.time_survived + statistic.food_eaten + statistic.food_seen\
+                          - statistic.poison_eaten + statistic.potions_seen + 0.5 * statistic.consumed_corpses \
+                          + 0.5 * statistic.enemies_attacked - statistic.attacked_by_opponents - statistic.attacked_by_predators - statistic.poison_seen \
+                          + statistic.potions_seen + 0.5 * statistic.opponents_seen - 0.5 * statistic.predators_seen - statistic.corpses_seen
+        score = dna[0][0] + dna[1][0] + dna[2][0] + statistic_score
+
         return score
