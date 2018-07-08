@@ -44,7 +44,7 @@ pip install numpy pyqt5
 ```
 python3 main.py <config> <blue breeder class> <yellow breeder class>
 # e.g:
-python3 main.py config.json genetic_algorithm/breeder.py genetic_algorithm/breeder_aggressive.py
+C:\tools\Anaconda3\python.exe main.py config.json genetic_algorithm/breeder.py genetic_algorithm/breeder_aggressive.py
 ```
 
 # Game Elements
