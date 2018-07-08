@@ -179,7 +179,6 @@ class Breeder:
                     t = alpha * sum(dna_a[i]) + (1 - alpha) * sum(dna_b[i])
                     s = beta * sum(dna_b[i]) + (1 - beta) * sum(dna_a[i])
                     if (t == 0 or t == 1) and (s == 0 or s == 1):
-                        print('true')
                         dna_a[i], dna_b[i] = dna_b[i], dna_a[i]
         solution_a.dna_to_traits(dna_a)
         solution_b.dna_to_traits(dna_b)

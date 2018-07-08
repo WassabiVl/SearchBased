@@ -1,13 +1,20 @@
-from game.individuals.dot import Dot
+from builtins import range
 
-from random import choice, uniform
 from copy import copy
 
+from game.individuals.dot import Dot
+
 import numpy as np
+from random import choice, uniform
+from numpy import isclose
+
 
 class Breeder:
     def __init__(self, parent):
         self.parent = parent
+        self.best_fitness = 0
+        self.best_individual = None
+        self.total_population = []
 
     def breed(self, population):
         """
@@ -26,7 +33,6 @@ class Breeder:
         """
         return self.initialize_population_example(num_individuals, color)
 
-    
     def initialize_population_example(self, num_individuals, color):
         """
         example initializer
@@ -36,7 +42,6 @@ class Breeder:
         for _ in range(num_individuals):
             population.append(Dot(self.parent, color=color))
         return population
-
 
     def breed_copy_dead_example(self, population):
         """
@@ -69,7 +74,6 @@ class Breeder:
             population_cpy.remove(dead_individual)
         return population_cpy
 
-
     def breed_example_with_ga(self, population):
         """
         application of a basic genetic algorithm for breeding
@@ -91,12 +95,16 @@ class Breeder:
             selected = self.select_example(population_cpy)
             parent1 = selected[0]
             parent2 = selected[1]
-            child1, child2 = self.crossover_example(copy(parent1), copy(parent2))
-            child1 = self.tweak_example(child1)
-            child2 = self.tweak_example(child2)
-            score_child1 = self.assess_individual_fitness_example(child1)
-            score_child2 = self.assess_individual_fitness_example(child2)
-            if score_child1 > score_child2:
+            child1, child2 = self.crossover_line_recombination_algorithm(copy(parent1), copy(parent2))
+            child1 = self.CheckChild(child1)
+            child2 = self.CheckChild(child2)
+            if child1 not in self.total_population:
+                self.total_population.append(child1)
+            score_child1 = self.assessIndividualFitness(child1)
+            score_child2 = self.assessIndividualFitness(child2)
+            if self.best_fitness > score_child1 and self.best_fitness > score_child2:
+                new_individual = Dot(self.parent, color=color, position=where, dna=self.best_individual.get_dna())
+            elif score_child1 > score_child2:
                 new_individual = Dot(self.parent, color=color, position=where, dna=child1.get_dna())
             else:
                 new_individual = Dot(self.parent, color=color, position=where, dna=child2.get_dna())
@@ -104,7 +112,6 @@ class Breeder:
         for dead_individual in dead:
             population_cpy.remove(dead_individual)
         return population_cpy
-
 
     def tweak_example(self, individual):
         """
@@ -119,11 +126,17 @@ class Breeder:
         abil = dna[2]
 
         perc = self.mutate_dna(
-            dna=perc, increase_value=increase, increase=3)
+            dna=perc, increase_value=increase, increase=0)
+        perc = self.mutate_dna(
+            dna=perc, increase_value=increase, increase=2)
         des = self.mutate_dna(
-            dna=des, increase_value=increase, increase=3)
+            dna=des, increase_value=increase, increase=0)
+        des = self.mutate_dna(
+            dna=des, increase_value=increase, increase=2)
         abil = self.mutate_dna(
-            dna=abil, increase_value=increase, increase=2)
+            dna=abil, increase_value=increase, increase=0)
+        abil = self.mutate_dna(
+            dna=abil, increase_value=increase, increase=1)
 
         dna = [perc, des, abil]
         individual.dna_to_traits(dna)
@@ -150,18 +163,23 @@ class Breeder:
         # otherwise we cannot do anything
         return dna
 
-
-    def crossover_example(self, solution_a, solution_b):
+    @staticmethod
+    def crossover_line_recombination_algorithm(solution_a, solution_b):
         """
         crossover of two individuals
         """
+        outreach_p = 0.25
+        alpha = uniform(-outreach_p, 1 + outreach_p)
+        beta = uniform(-outreach_p, 1 + outreach_p)
         dna_a = solution_a.get_dna()
         dna_b = solution_b.get_dna()
-        for i in range(len(dna_a)):
-            if uniform(0, 1) < 0.5:
-                tmp = dna_a[i]
-                dna_a[i] = dna_b[i]
-                dna_b[i] = tmp
+        if dna_a != dna_b:  # stop crossover twins
+            for i in range(len(dna_a)):
+                if dna_a[i] != dna_b[i]:  # reduce processing time
+                    t = alpha * sum(dna_a[i]) + (1 - alpha) * sum(dna_b[i])
+                    s = beta * sum(dna_b[i]) + (1 - beta) * sum(dna_a[i])
+                    if (t == 0 or t == 1) and (s == 0 or s == 1):
+                        dna_a[i], dna_b[i] = dna_b[i], dna_a[i]
         solution_a.dna_to_traits(dna_a)
         solution_b.dna_to_traits(dna_b)
         return solution_a, solution_b
@@ -172,13 +190,13 @@ class Breeder:
         """
         fitness_array = np.empty([len(population)])
         for i in range(len(population)):
-            score = self.assess_individual_fitness_example(population[i])
+            score = self.assessIndividualFitness(population[i])
             fitness_array[i] = score
-        
+
         # span value range
         for i in range(1, len(fitness_array)):
             fitness_array[i] = fitness_array[i] + fitness_array[i - 1]
-        
+
         parents = self.selectParentSUS(population, fitness_array, 2)
         return parents
 
@@ -201,7 +219,7 @@ class Breeder:
         # return all selected individual indices
         return np.array(individual_indices)
 
-    def assess_individual_fitness_example(self, individual):
+    def assessIndividualFitness(self, individual):
         """
         example fitness assessment of an individual
         """
@@ -232,6 +250,34 @@ class Breeder:
         #   poison_resistance =  [2][3]
         #   toxicity =           [2][4]
         dna = individual.get_dna()
-        score = dna[0][3] + dna[1][3] + dna[2][2] + \
-            statistic.enemies_attacked + statistic.consumed_corpses + statistic.opponents_seen
+        # you should come up with your own fitness function
+        # what makes up a good individual?
+        # maybe one that survived long, had a large food perception
+        # and a high desire to eat food + high armor?
+        statistic_score = 2.0 * statistic.time_survived + statistic.food_eaten + statistic.food_seen - \
+                          statistic.poison_eaten + statistic.potions_seen + 0.5 * statistic.consumed_corpses \
+                          + 0.5 * statistic.enemies_attacked - statistic.attacked_by_opponents - statistic.attacked_by_predators - statistic.poison_seen \
+                          + statistic.potions_seen + 0.5 * statistic.opponents_seen - 0.5 * statistic.predators_seen - statistic.corpses_seen
+        dna_score = dna[0][0] + dna[1][0] + dna[2][0] - dna[0][1] + dna[0][2] - dna[0][3] - dna[0][4] - dna[0][5] \
+                    + dna[1][1] + dna[1][2] - dna[1][3] - dna[1][4] + dna[1][5] + 2 * dna[2][1] + dna[2][2] + dna[2][3] - \
+                    dna[2][4]
+        score = dna_score + statistic_score
+        if score > self.best_fitness:
+            self.best_fitness = score
+            self.best_individual = individual
         return score
+
+    def CheckChild(self, child):
+        i = 10
+        if child not in self.total_population:
+            self.total_population.append(child)
+            return child
+        else:
+            while True:
+                if i > 10:
+                    return child
+                tmp_child = self.tweak_example(child)
+                if tmp_child != child or tmp_child not in self.total_population:
+                    self.total_population.append(tmp_child)
+                    return tmp_child
+                i += 1
