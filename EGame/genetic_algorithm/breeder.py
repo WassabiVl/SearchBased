@@ -98,8 +98,6 @@ class Breeder:
             child1, child2 = self.crossover_line_recombination_algorithm(copy(parent1), copy(parent2))
             child1 = self.CheckChild(child1)
             child2 = self.CheckChild(child2)
-            if child1 not in self.total_population:
-                self.total_population.append(child1)
             score_child1 = self.assessIndividualFitness(child1)
             score_child2 = self.assessIndividualFitness(child2)
             if self.best_fitness > score_child1 and self.best_fitness > score_child2:
