@@ -98,8 +98,6 @@ class Breeder:
             child1, child2 = self.crossover_line_recombination_algorithm(copy(parent1), copy(parent2))
             child1 = self.CheckChild(child1)
             child2 = self.CheckChild(child2)
-            if child1 not in self.total_population:
-                self.total_population.append(child1)
             score_child1 = self.assessIndividualFitness(child1)
             score_child2 = self.assessIndividualFitness(child2)
             if self.best_fitness > score_child1 and self.best_fitness > score_child2:
@@ -120,23 +118,47 @@ class Breeder:
 
         dna = individual.get_dna()
         increase = uniform(0, 0.1)
-
+        statistics = individual.statistic
+        statistic = [statistics.food_eaten, statistics.consumed_potions, statistics.consumed_corpses,
+                     statistics.enemies_attacked, statistics.poison_eaten]
         perc = dna[0]
         des = dna[1]
         abil = dna[2]
-
-        perc = self.mutate_dna(
-            dna=perc, increase_value=increase, increase=0)
-        perc = self.mutate_dna(
-            dna=perc, increase_value=increase, increase=2)
-        des = self.mutate_dna(
-            dna=des, increase_value=increase, increase=0)
-        des = self.mutate_dna(
-            dna=des, increase_value=increase, increase=2)
-        abil = self.mutate_dna(
-            dna=abil, increase_value=increase, increase=0)
-        abil = self.mutate_dna(
-            dna=abil, increase_value=increase, increase=1)
+        if max(statistic) == statistics.food_eaten:  # if the best statistics is food
+            perc = self.mutate_dna(
+                dna=perc, increase_value=increase, increase=0)
+            des = self.mutate_dna(
+                dna=des, increase_value=increase, increase=0)
+            abil = self.mutate_dna(
+                dna=abil, increase_value=increase, increase=0)
+        elif max(statistic) == statistics.consumed_potions:
+            perc = self.mutate_dna(
+                dna=perc, increase_value=increase, increase=2)
+            des = self.mutate_dna(
+                dna=des, increase_value=increase, increase=2)
+            abil = self.mutate_dna(
+                dna=abil, increase_value=increase, increase=1)
+        elif max(statistic) == statistics.consumed_corpses:
+            perc = self.mutate_dna(
+                dna=perc, increase_value=increase, increase=4)
+            des = self.mutate_dna(
+                dna=des, increase_value=increase, increase=4)
+            abil = self.mutate_dna(
+                dna=abil, increase_value=increase, increase=3)
+        elif max(statistic) == statistics.enemies_attacked:
+            perc = self.mutate_dna(
+                dna=perc, increase_value=increase, increase=3)
+            des = self.mutate_dna(
+                dna=des, increase_value=increase, increase=3)
+            abil = self.mutate_dna(
+                dna=abil, increase_value=increase, increase=2)
+        else:
+            perc = self.mutate_dna(
+                dna=perc, increase_value=increase, increase=5)
+            des = self.mutate_dna(
+                dna=des, increase_value=increase, increase=5)
+            abil = self.mutate_dna(
+                dna=abil, increase_value=increase, increase=4)
 
         dna = [perc, des, abil]
         individual.dna_to_traits(dna)
@@ -269,6 +291,7 @@ class Breeder:
 
     def CheckChild(self, child):
         i = 10
+        child = self.tweak_example(child)
         if child not in self.total_population:
             self.total_population.append(child)
             return child
