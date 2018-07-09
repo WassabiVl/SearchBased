@@ -118,23 +118,34 @@ class Breeder:
 
         dna = individual.get_dna()
         increase = uniform(0, 0.1)
-
+        statistics = individual.statistic
+        statistics.remove(statistics.time_survived)  # since time will always be the highest
         perc = dna[0]
         des = dna[1]
         abil = dna[2]
 
-        perc = self.mutate_dna(
-            dna=perc, increase_value=increase, increase=0)
-        perc = self.mutate_dna(
-            dna=perc, increase_value=increase, increase=2)
-        des = self.mutate_dna(
-            dna=des, increase_value=increase, increase=0)
-        des = self.mutate_dna(
-            dna=des, increase_value=increase, increase=2)
-        abil = self.mutate_dna(
-            dna=abil, increase_value=increase, increase=0)
-        abil = self.mutate_dna(
-            dna=abil, increase_value=increase, increase=1)
+        if max(statistics) == statistics.food_eaten:  # if the best statistics is food
+            perc = self.mutate_dna(
+                dna=perc, increase_value=increase, increase=0)
+            des = self.mutate_dna(
+                dna=des, increase_value=increase, increase=0)
+            abil = self.mutate_dna(
+                dna=abil, increase_value=increase, increase=0)
+        elif max(statistics) == statistics.consumed_potions:
+            perc = self.mutate_dna(
+                dna=perc, increase_value=increase, increase=2)
+            des = self.mutate_dna(
+                dna=des, increase_value=increase, increase=2)
+            abil = self.mutate_dna(
+                dna=abil, increase_value=increase, increase=2)
+        elif max(statistics) == statistics.consumed_corpses:
+            perc = self.mutate_dna(
+                dna=perc, increase_value=increase, increase=4)
+            des = self.mutate_dna(
+                dna=des, increase_value=increase, increase=4)
+            abil = self.mutate_dna(
+                dna=abil, increase_value=increase, increase=3)
+
 
         dna = [perc, des, abil]
         individual.dna_to_traits(dna)
